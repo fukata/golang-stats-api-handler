@@ -71,7 +71,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
     }
 
     headers := make(map[string]string)
-    headers["Content-Type"]    = "text/html; charset=UTF-8"
+    headers["Content-Type"]    = "application/json"
     headers["Content-Length"]  = strconv.Itoa(len(body))
     for name, value := range headers {
         w.Header().Set(name, value)
