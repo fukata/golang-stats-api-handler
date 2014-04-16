@@ -24,7 +24,7 @@ Golang cpu, memory, gc, etc information api handler.
     $ curl -i http://localhost:8080/api/stats/
     HTTP/1.1 200 OK
     Content-Length: 375
-    Content-Type: text/html; charset=UTF-8
+    Content-Type: application/json
     Date: Sat, 30 Nov 2013 00:42:54 GMT
     
     {
