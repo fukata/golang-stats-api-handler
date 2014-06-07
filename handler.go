@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+var newLineTerm bool = false
+
 type result struct {
 	// runtime
 	GoVersion    string `json:"go_version"`
@@ -35,6 +37,14 @@ type result struct {
 	GcNext uint64 `json:"gc_next"`
 	GcLast uint64 `json:"gc_last"`
 	GcNum  uint32 `json:"gc_num"`
+}
+
+func NewLineTermEnabled() {
+	newLineTerm = true
+}
+
+func NewLineTermDisabled() {
+	newLineTerm = false
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +85,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		body = jsonErr.Error()
 	} else {
 		body = string(jsonBytes)
+	}
+
+	if newLineTerm {
+		body += "\n"
 	}
 
 	headers := make(map[string]string)
