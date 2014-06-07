@@ -9,10 +9,14 @@ import (
 )
 
 type result struct {
-	CpuNum       int   `json:"cpu_num"`
-	GoroutineNum int   `json:"goroutine_num"`
-	Gomaxprocs   int   `json:"gomaxprocs"`
-	CgoCallNum   int64 `json:"cgo_call_num"`
+	// runtime
+	GoVersion    string `json:"go_version"`
+	GoOs         string `json:"go_os"`
+	GoArch       string `json:"go_arch"`
+	CpuNum       int    `json:"cpu_num"`
+	GoroutineNum int    `json:"goroutine_num"`
+	Gomaxprocs   int    `json:"gomaxprocs"`
+	CgoCallNum   int64  `json:"cgo_call_num"`
 	// memory
 	MemoryAlloc      uint64 `json:"memory_alloc"`
 	MemoryTotalAlloc uint64 `json:"memory_total_alloc"`
@@ -38,6 +42,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	runtime.ReadMemStats(&mem)
 
 	result := &result{
+		GoVersion:    runtime.Version(),
+		GoOs:         runtime.GOOS,
+		GoArch:       runtime.GOARCH,
 		CpuNum:       runtime.NumCPU(),
 		GoroutineNum: runtime.NumGoroutine(),
 		Gomaxprocs:   runtime.GOMAXPROCS(0),
