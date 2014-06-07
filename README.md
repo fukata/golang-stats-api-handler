@@ -28,6 +28,9 @@ Golang cpu, memory, gc, etc information api handler.
     Date: Sat, 30 Nov 2013 00:42:54 GMT
     
     {
+        "go_version": "1.2.2",
+        "go_os": "darwin",
+        "go_arch": "amd64",
         "gc_num": 1,
         "gc_last": 1385772060688109000,
         "gc_next": 1622624,
