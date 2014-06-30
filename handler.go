@@ -148,35 +148,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
 
-	result := &result{
-		GoVersion:    runtime.Version(),
-		GoOs:         runtime.GOOS,
-		GoArch:       runtime.GOARCH,
-		CpuNum:       runtime.NumCPU(),
-		GoroutineNum: runtime.NumGoroutine(),
-		Gomaxprocs:   runtime.GOMAXPROCS(0),
-		CgoCallNum:   runtime.NumCgoCall(),
-		// memory
-		MemoryAlloc:      mem.Alloc,
-		MemoryTotalAlloc: mem.TotalAlloc,
-		MemorySys:        mem.Sys,
-		MemoryLookups:    mem.Lookups,
-		MemoryMallocs:    mem.Mallocs,
-		MemoryFrees:      mem.Frees,
-		// heap
-		HeapAlloc:    mem.HeapAlloc,
-		HeapSys:      mem.HeapSys,
-		HeapIdle:     mem.HeapIdle,
-		HeapInuse:    mem.HeapInuse,
-		HeapReleased: mem.HeapReleased,
-		HeapObjects:  mem.HeapObjects,
-		// garbage collection
-		GcNext: mem.NextGC,
-		GcLast: mem.LastGC,
-		GcNum:  mem.NumGC,
-	}
-
-	jsonBytes, jsonErr := json.Marshal(result)
+	jsonBytes, jsonErr := json.Marshal(GetStats())
 	var body string
 	if jsonErr != nil {
 		body = jsonErr.Error()
