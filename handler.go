@@ -33,7 +33,7 @@ type result struct {
 	HeapInuse    uint64 `json:"heap_inuse"`
 	HeapReleased uint64 `json:"heap_released"`
 	HeapObjects  uint64 `json:"heap_objects"`
-	// gabarage collection
+	// garbage collection
 	GcNext uint64 `json:"gc_next"`
 	GcLast uint64 `json:"gc_last"`
 	GcNum  uint32 `json:"gc_num"`
@@ -73,7 +73,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		HeapInuse:    mem.HeapInuse,
 		HeapReleased: mem.HeapReleased,
 		HeapObjects:  mem.HeapObjects,
-		// gabarage collection
+		// garbage collection
 		GcNext: mem.NextGC,
 		GcLast: mem.LastGC,
 		GcNum:  mem.NumGC,
