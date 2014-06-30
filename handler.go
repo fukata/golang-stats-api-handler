@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"runtime"
 	"strconv"
+	"sync"
+	"time"
 )
-
-var newLineTerm bool = false
-
-type result struct {
+ 
+type Stats struct {
+	Time int64 `json:"time"`
 	// runtime
 	GoVersion    string `json:"go_version"`
 	GoOs         string `json:"go_os"`
@@ -26,6 +27,8 @@ type result struct {
 	MemoryLookups    uint64 `json:"memory_lookups"`
 	MemoryMallocs    uint64 `json:"memory_mallocs"`
 	MemoryFrees      uint64 `json:"memory_frees"`
+	// stack
+	StackInUse uint64 `json:"memory_stack"`
 	// heap
 	HeapAlloc    uint64 `json:"heap_alloc"`
 	HeapSys      uint64 `json:"heap_sys"`
@@ -34,24 +37,70 @@ type result struct {
 	HeapReleased uint64 `json:"heap_released"`
 	HeapObjects  uint64 `json:"heap_objects"`
 	// garbage collection
-	GcNext uint64 `json:"gc_next"`
-	GcLast uint64 `json:"gc_last"`
-	GcNum  uint32 `json:"gc_num"`
+	GcNext           uint64    `json:"gc_next"`
+	GcLast           uint64    `json:"gc_last"`
+	GcNum            uint32    `json:"gc_num"`
+	GcPerSecond      float64   `json:"gc_per_second"`
+	GcPausePerSecond float64   `json:"gc_pause_per_second"`
+	GcPause          []float64 `json:"gc_pause"`
 }
-
-func NewLineTermEnabled() {
-	newLineTerm = true
-}
-
-func NewLineTermDisabled() {
-	newLineTerm = false
-}
-
-func Handler(w http.ResponseWriter, r *http.Request) {
+ 
+var lastSampleTime time.Time
+var lastPauseNs uint64 = 0
+var lastNumGc uint32 = 0
+ 
+var nsInMs float64 = float64(time.Millisecond)
+ 
+var statsMux sync.Mutex
+ 
+func GetStats() *Stats {
+	statsMux.Lock()
+	defer statsMux.Unlock()
+ 
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
-
-	result := &result{
+ 
+	now := time.Now()
+ 
+	var gcPausePerSecond float64
+ 
+	if lastPauseNs > 0 {
+		pauseSinceLastSample := mem.PauseTotalNs - lastPauseNs
+		gcPausePerSecond = float64(pauseSinceLastSample) / nsInMs
+	}
+ 
+	lastPauseNs = mem.PauseTotalNs
+ 
+	countGc := int(mem.NumGC - lastNumGc)
+ 
+	var gcPerSecond float64
+ 
+	if lastNumGc > 0 {
+		diff := float64(countGc)
+		diffTime := now.Sub(lastSampleTime).Seconds()
+		gcPerSecond = diff / diffTime
+	}
+ 
+	gcPause := make([]float64, countGc)
+ 
+	if countGc > 0 {
+		if countGc > 256 {
+			// lagging GC pause times
+			countGc = 256
+		}
+ 
+		for i := 0; i < countGc; i++ {
+			idx := int((mem.NumGC-uint32(i))+255) % 256
+			pause := float64(mem.PauseNs[idx])
+			gcPause[i] = pause / nsInMs
+		}
+	}
+ 
+	lastNumGc = mem.NumGC
+	lastSampleTime = time.Now()
+ 
+	return &Stats{
+		Time:         now.UnixNano(),
 		GoVersion:    runtime.Version(),
 		GoOs:         runtime.GOOS,
 		GoArch:       runtime.GOARCH,
@@ -66,6 +115,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		MemoryLookups:    mem.Lookups,
 		MemoryMallocs:    mem.Mallocs,
 		MemoryFrees:      mem.Frees,
+		// stack
+		StackInUse: mem.StackInuse,
 		// heap
 		HeapAlloc:    mem.HeapAlloc,
 		HeapSys:      mem.HeapSys,
@@ -74,12 +125,30 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		HeapReleased: mem.HeapReleased,
 		HeapObjects:  mem.HeapObjects,
 		// garbage collection
-		GcNext: mem.NextGC,
-		GcLast: mem.LastGC,
-		GcNum:  mem.NumGC,
+		GcNext:           mem.NextGC,
+		GcLast:           mem.LastGC,
+		GcNum:            mem.NumGC,
+		GcPerSecond:      gcPerSecond,
+		GcPausePerSecond: gcPausePerSecond,
+		GcPause:          gcPause,
 	}
+}
 
-	jsonBytes, jsonErr := json.Marshal(result)
+var newLineTerm bool = false
+
+func NewLineTermEnabled() {
+	newLineTerm = true
+}
+
+func NewLineTermDisabled() {
+	newLineTerm = false
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+
+	jsonBytes, jsonErr := json.Marshal(GetStats())
 	var body string
 	if jsonErr != nil {
 		body = jsonErr.Error()
