@@ -135,6 +135,7 @@ func GetStats() *Stats {
 }
 
 var newLineTerm bool = false
+var prettyPrint bool = false
 
 func NewLineTermEnabled() {
 	newLineTerm = true
@@ -144,11 +145,25 @@ func NewLineTermDisabled() {
 	newLineTerm = false
 }
 
+func PrettyPrintEnabled() {
+	prettyPrint = true
+}
+
+func PrettyPrintDisabled() {
+	prettyPrint = false
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
 
-	jsonBytes, jsonErr := json.Marshal(GetStats())
+	var jsonBytes []byte
+	var jsonErr error
+	if prettyPrint {
+		jsonBytes, jsonErr = json.MarshalIndent(GetStats(), "", "  ")
+	} else {
+		jsonBytes, jsonErr = json.Marshal(GetStats())
+	}
 	var body string
 	if jsonErr != nil {
 		body = jsonErr.Error()
