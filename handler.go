@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 )
- 
+
 type Stats struct {
 	Time int64 `json:"time"`
 	// runtime
@@ -44,61 +44,61 @@ type Stats struct {
 	GcPausePerSecond float64   `json:"gc_pause_per_second"`
 	GcPause          []float64 `json:"gc_pause"`
 }
- 
+
 var lastSampleTime time.Time
 var lastPauseNs uint64 = 0
 var lastNumGc uint32 = 0
- 
+
 var nsInMs float64 = float64(time.Millisecond)
- 
+
 var statsMux sync.Mutex
- 
+
 func GetStats() *Stats {
 	statsMux.Lock()
 	defer statsMux.Unlock()
- 
+
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
- 
+
 	now := time.Now()
- 
+
 	var gcPausePerSecond float64
- 
+
 	if lastPauseNs > 0 {
 		pauseSinceLastSample := mem.PauseTotalNs - lastPauseNs
 		gcPausePerSecond = float64(pauseSinceLastSample) / nsInMs
 	}
- 
+
 	lastPauseNs = mem.PauseTotalNs
- 
+
 	countGc := int(mem.NumGC - lastNumGc)
- 
+
 	var gcPerSecond float64
- 
+
 	if lastNumGc > 0 {
 		diff := float64(countGc)
 		diffTime := now.Sub(lastSampleTime).Seconds()
 		gcPerSecond = diff / diffTime
 	}
- 
+
 	gcPause := make([]float64, countGc)
- 
+
 	if countGc > 0 {
 		if countGc > 256 {
 			// lagging GC pause times
 			countGc = 256
 		}
- 
+
 		for i := 0; i < countGc; i++ {
 			idx := int((mem.NumGC-uint32(i))+255) % 256
 			pause := float64(mem.PauseNs[idx])
 			gcPause[i] = pause / nsInMs
 		}
 	}
- 
+
 	lastNumGc = mem.NumGC
 	lastSampleTime = time.Now()
- 
+
 	return &Stats{
 		Time:         now.UnixNano(),
 		GoVersion:    runtime.Version(),
@@ -135,6 +135,7 @@ func GetStats() *Stats {
 }
 
 var newLineTerm bool = false
+var prettyPrint bool = false
 
 func NewLineTermEnabled() {
 	newLineTerm = true
@@ -144,11 +145,25 @@ func NewLineTermDisabled() {
 	newLineTerm = false
 }
 
+func PrettyPrintEnabled() {
+	prettyPrint = true
+}
+
+func PrettyPrintDisabled() {
+	prettyPrint = false
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
 
-	jsonBytes, jsonErr := json.Marshal(GetStats())
+	var jsonBytes []byte
+	var jsonErr error
+	if prettyPrint {
+		jsonBytes, jsonErr = json.MarshalIndent(GetStats(), "", "  ")
+	} else {
+		jsonBytes, jsonErr = json.Marshal(GetStats())
+	}
 	var body string
 	if jsonErr != nil {
 		body = jsonErr.Error()
