@@ -51,3 +51,8 @@ Golang cpu, memory, gc, etc information api handler.
         "heap_released": 0,
         "heap_objects": 2126
     }
+
+## Plugins
+
+- Zabbix: [fukata/golang-stats-api-handler-zabbix-userparameter](https://github.com/fukata/golang-stats-api-handler-zabbix-userparameter)
+- Munin: [fukata/golang-stats-api-handler-munin-plugin](https://github.com/fukata/golang-stats-api-handler-munin-plugin) 
