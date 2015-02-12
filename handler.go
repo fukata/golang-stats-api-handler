@@ -88,13 +88,10 @@ func GetStats() *Stats {
 
 	gcPause := make([]float64, countGc)
 
-	if countGc > 0 {
-
-		for i := 0; i < countGc; i++ {
-			idx := int((mem.NumGC-uint32(i))+255) % 256
-			pause := float64(mem.PauseNs[idx])
-			gcPause[i] = pause / nsInMs
-		}
+	for i := 0; i < countGc; i++ {
+		idx := int((mem.NumGC-uint32(i))+255) % 256
+		pause := float64(mem.PauseNs[idx])
+		gcPause[i] = pause / nsInMs
 	}
 
 	lastNumGc = mem.NumGC
