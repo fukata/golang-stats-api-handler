@@ -81,13 +81,14 @@ func GetStats() *Stats {
 		gcPerSecond = diff / diffTime
 	}
 
+	if countGc > 256 {
+		// lagging GC pause times
+		countGc = 256
+	}
+
 	gcPause := make([]float64, countGc)
 
 	if countGc > 0 {
-		if countGc > 256 {
-			// lagging GC pause times
-			countGc = 256
-		}
 
 		for i := 0; i < countGc; i++ {
 			idx := int((mem.NumGC-uint32(i))+255) % 256
