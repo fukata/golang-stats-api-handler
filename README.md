@@ -25,34 +25,74 @@ func main() {
 
     $ curl -i http://localhost:8080/api/stats/
     HTTP/1.1 200 OK
-    Content-Length: 375
+    Content-Length: 712
     Content-Type: application/json
-    Date: Sat, 30 Nov 2013 00:42:54 GMT
+    Date: Sun, 23 Aug 2015 16:52:13 GMT
     
     {
-        "go_version": "1.2.2",
+        "time": 1440348733548339479,
+        "go_version": "go1.5",
         "go_os": "darwin",
         "go_arch": "amd64",
-        "gc_num": 1,
-        "gc_last": 1385772060688109000,
-        "gc_next": 1622624,
-        "memory_lookups": 68,
-        "memory_sys": 272289616,
-        "memory_total_alloc": 1257976,
-        "memory_alloc": 1228864,
-        "cgo_call_num": 0,
-        "gomaxprocs": 4,
-        "goroutine_num": 5,
-        "cpu_num": 4,
-        "memory_mallocs": 2185,
-        "memory_frees": 59,
-        "heap_alloc": 1228864,
-        "heap_sys": 2097152,
-        "heap_idle": 720896,
-        "heap_inuse": 1376256,
+        "cpu_num": 8,
+        "goroutine_num": 24,
+        "gomaxprocs": 8,
+        "cgo_call_num": 9,
+        "memory_alloc": 3974536,
+        "memory_total_alloc": 12857888,
+        "memory_sys": 12871928,
+        "memory_lookups": 52,
+        "memory_mallocs": 144922,
+        "memory_frees": 118936,
+        "memory_stack": 688128,
+        "heap_alloc": 3974536,
+        "heap_sys": 8028160,
+        "heap_idle": 2170880,
+        "heap_inuse": 5857280,
         "heap_released": 0,
-        "heap_objects": 2126
+        "heap_objects": 25986,
+        "gc_next": 4833706,
+        "gc_last": 1440348732827834419,
+        "gc_num": 4,
+        "gc_per_second": 0,
+        "gc_pause_per_second": 0,
+        "gc_pause": [
+            0.196828,
+            2.027442,
+            0.181887,
+            0.312866
+        ]
     }
+
+|Key                |Value|
+|-------------------|----------------|
+|time               |unix timestamp as nano-seconds|
+|go_version         |runtime.Version()|
+|go_os              |runtime.GOOS|
+|go_arch            |runtime.GOARCH|
+|cpu_num            |number of CPUs|
+|goroutine_num      |number of goroutines|
+|gomaxprocs         |runtime.GOMAXRPOCS(0)|
+|cgo_call_num       |runtime.NumCgoCall()|
+|memory_alloc       |bytes allocated and not yet freed|
+|memory_total_alloc |bytes allocated (even if freed)|
+|memory_sys         |bytes obtained from system|
+|memory_lookups     |number of pointer lookups|
+|memory_mallocs     |number of mallocs|
+|memory_frees       |number of frees|
+|memory_stack       |bytes used by stack allocator|
+|heap_alloc         |bytes allocated and not yet freed (same as memory_alloc above)|
+|heap_sys           |bytes obtained from system (not same as memory_sys)|
+|heap_idle          |bytes in idle spans|
+|heap_inuse         |bytes in non-idle span|
+|heap_released      |bytes released to the OS|
+|heap_objects       |total number of allocated objects|
+|gc_next            |next collection will happen when HeapAlloc ≥ this amount|
+|gc_last            |end time of last collection|
+|gc_num             |number of GC-run|
+|gc_per_second      |number of GC-run per second|
+|gc_pause_per_second|pause duration by GC per seconds|
+|gc_pause           |pause durations by GC|
 
 ## Plugins
 
