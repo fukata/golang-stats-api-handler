@@ -161,6 +161,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
 
+	values := r.URL.Query()
+	for _, c := range []string{"1", "true"} {
+		if values.Get("pp") == c {
+			prettyPrint = true
+		}
+	}
+
 	var jsonBytes []byte
 	var jsonErr error
 	if prettyPrint {
