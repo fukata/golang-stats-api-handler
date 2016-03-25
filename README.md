@@ -3,6 +3,8 @@ golang-stats-api-handler
 
 Golang cpu, memory, gc, etc information api handler.
 
+[![Build Status](https://travis-ci.org/fukata/golang-stats-api-handler.svg?branch=master)](https://travis-ci.org/fukata/golang-stats-api-handler)
+
 ## Install
 
     go get github.com/fukata/golang-stats-api-handler
