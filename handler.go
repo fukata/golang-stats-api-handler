@@ -158,6 +158,13 @@ func PrettyPrintDisabled() {
 
 // Handler returns activity status of Go.
 func Handler(w http.ResponseWriter, r *http.Request) {
+	values := r.URL.Query()
+	for _, c := range []string{"1", "true"} {
+		if values.Get("pp") == c {
+			prettyPrint = true
+		}
+	}
+
 	var jsonBytes []byte
 	var jsonErr error
 	if prettyPrint {
