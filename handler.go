@@ -158,9 +158,6 @@ func PrettyPrintDisabled() {
 
 // Handler returns activity status of Go.
 func Handler(w http.ResponseWriter, r *http.Request) {
-	var mem runtime.MemStats
-	runtime.ReadMemStats(&mem)
-
 	var jsonBytes []byte
 	var jsonErr error
 	if prettyPrint {
